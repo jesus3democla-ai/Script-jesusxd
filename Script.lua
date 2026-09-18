@@ -1,4 +1,4 @@
--- Script Jesús con Mini Panel Móvil
+- Script Jesús con Mini Panel Móvil
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
