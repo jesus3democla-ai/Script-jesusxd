@@ -1,32 +1,67 @@
--- Script Jesús con Mini Panel Flotante
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Script Jesús", "DarkTheme")
+-- Script Jesús con Mini Panel Móvil
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local SpeedBtn = Instance.new("TextButton")
+local NoclipBtn = Instance.new("TextButton")
+local XRayBtn = Instance.new("TextButton")
+local CloseBtn = Instance.new("TextButton")
 
--- Tab Principal
-local MainTab = Window:NewTab("Funciones")
-local MainSection = MainTab:NewSection("Controles")
+ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "JesúsPanel"
 
--- Variables de Estado
-local NoclipActive = false
-local XRayActive = false
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+Frame.Size = UDim2.new(0, 200, 0, 220)
+Frame.Active = true
+Frame.Draggable = true
 
--- 1. Velocidad
-MainSection:NewSlider("Velocidad", "Ajusta tu velocidad", 100, 16, function(v)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+Title.Parent = Frame
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "Script Jesús"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+-- Botón Velocidad
+SpeedBtn.Parent = Frame
+SpeedBtn.Position = UDim2.new(0.1, 0, 0.2, 0)
+SpeedBtn.Size = UDim2.new(0.8, 0, 0, 35)
+SpeedBtn.Text = "Velocidad: OFF"
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local speedOn = false
+SpeedBtn.MouseButton1Click:Connect(function()
+    speedOn = not speedOn
+    if speedOn then
+        SpeedBtn.Text = "Velocidad: ON"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(40, 150, 40)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 60
+    else
+        SpeedBtn.Text = "Velocidad: OFF"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end
 end)
 
--- 2. Salto
-MainSection:NewSlider("Salto", "Ajusta la fuerza de salto", 200, 50, function(v)
-    game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
-end)
+-- Botón Noclip
+NoclipBtn.Parent = Frame
+NoclipBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
+NoclipBtn.Size = UDim2.new(0.8, 0, 0, 35)
+NoclipBtn.Text = "Noclip: OFF"
+NoclipBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- 3. Noclip (On / Off)
-MainSection:NewToggle("Noclip (Paredes)", "Atraviesa paredes", function(state)
-    NoclipActive = state
+local noclipOn = false
+NoclipBtn.MouseButton1Click:Connect(function()
+    noclipOn = not noclipOn
+    NoclipBtn.Text = noclipOn and "Noclip: ON" or "Noclip: OFF"
+    NoclipBtn.BackgroundColor3 = noclipOn and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(150, 40, 40)
 end)
 
 game:GetService("RunService").Stepped:Connect(function()
-    if NoclipActive and game.Players.LocalPlayer.Character then
+    if noclipOn and game.Players.LocalPlayer.Character then
         for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
@@ -35,27 +70,14 @@ game:GetService("RunService").Stepped:Connect(function()
     end
 end)
 
--- 4. X-Ray (On / Off)
-MainSection:NewToggle("X-Ray (Transparencia)", "Ver a través de paredes", function(state)
-    XRayActive = state
-    for _, object in pairs(workspace:GetDescendants()) do
-        if object:IsA("BasePart") and not object:IsDescendantOf(game.Players.LocalPlayer.Character) then
-            object.LocalTransparencyModifier = XRayActive and 0.5 or 0
-        end
-    end
-end)
+-- Botón Cerrar/Abrir
+CloseBtn.Parent = Frame
+CloseBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
+CloseBtn.Size = UDim2.new(0.8, 0, 0, 35)
+CloseBtn.Text = "Cerrar Panel"
+CloseBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- 5. Anti-AFK (Siempre activo)
-local VirtualUser = game:GetService("VirtualUser")
-game.Players.LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+CloseBtn.MouseButton1Click:Connect(function()
+    Frame.Visible = false
 end)
-
--- Notificación
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Script Jesús";
-    Text = "¡Mini Panel Cargado!";
-    Duration = 5;
-})
