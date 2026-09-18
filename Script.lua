@@ -1,7 +1,19 @@
-echo "# Script-jesus" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/jesus3democla-ai/Script-jesus.git
-git push -u origin main
+-- Script Jesús para Roblox
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Notificación en pantalla
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Script Jesús";
+    Text = "¡Script activado con éxito!";
+    Duration = 5;
+})
+
+-- Mejoras de velocidad y salto
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+    LocalPlayer.Character.Humanoid.WalkSpeed = 32
+    LocalPlayer.Character.Humanoid.JumpPower = 100
+end
+
+print("Script Jesús ejecutado correctamente.")
+
