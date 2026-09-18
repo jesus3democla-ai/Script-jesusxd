@@ -1,12 +1,13 @@
--- Script Jesús v3 (Con Menú Circular, Dash, TP con Distancia, X-Ray y Anti-AFK)
+-- Script Jesús v4 (Con Menú Circular, WalkSpeed, X-Ray, Dash, TP, Noclip y Anti-AFK)
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "JesusPanelV3"
+ScreenGui.Name = "JesusPanelV4"
 
 -- 1. BOTÓN CIRCULAR (+ / -)
 local CircleBtn = Instance.new("TextButton")
@@ -30,7 +31,7 @@ local Frame = Instance.new("Frame")
 Frame.Parent = ScreenGui
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.Position = UDim2.new(0.2, 0, 0.15, 0)
-Frame.Size = UDim2.new(0, 230, 0, 310)
+Frame.Size = UDim2.new(0, 230, 0, 360)
 Frame.Active = true
 Frame.Draggable = true
 
@@ -41,7 +42,7 @@ FrameCorner.Parent = Frame
 local Title = Instance.new("TextLabel")
 Title.Parent = Frame
 Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "Script Jesús v3"
+Title.Text = "Script Jesús v4"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 Title.Font = Enum.Font.SourceSansBold
@@ -61,8 +62,8 @@ end)
 -- A) Velocidad
 local SpeedBtn = Instance.new("TextButton")
 SpeedBtn.Parent = Frame
-SpeedBtn.Position = UDim2.new(0.08, 0, 0.14, 0)
-SpeedBtn.Size = UDim2.new(0.84, 0, 0, 32)
+SpeedBtn.Position = UDim2.new(0.08, 0, 0.12, 0)
+SpeedBtn.Size = UDim2.new(0.84, 0, 0, 30)
 SpeedBtn.Text = "Velocidad: OFF"
 SpeedBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
 SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -77,11 +78,37 @@ SpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- B) X-Ray
+-- B) Noclip (Atravesar paredes)
+local NoclipBtn = Instance.new("TextButton")
+NoclipBtn.Parent = Frame
+NoclipBtn.Position = UDim2.new(0.08, 0, 0.22, 0)
+NoclipBtn.Size = UDim2.new(0.84, 0, 0, 30)
+NoclipBtn.Text = "Noclip: OFF"
+NoclipBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local noclipOn = false
+NoclipBtn.MouseButton1Click:Connect(function()
+    noclipOn = not noclipOn
+    NoclipBtn.Text = noclipOn and "Noclip: ON" or "Noclip: OFF"
+    NoclipBtn.BackgroundColor3 = noclipOn and Color3.fromRGB(40, 150, 40) or Color3.fromRGB(150, 40, 40)
+end)
+
+RunService.Stepped:Connect(function()
+    if noclipOn and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- C) X-Ray
 local XRayBtn = Instance.new("TextButton")
 XRayBtn.Parent = Frame
-XRayBtn.Position = UDim2.new(0.08, 0, 0.27, 0)
-XRayBtn.Size = UDim2.new(0.84, 0, 0, 32)
+XRayBtn.Position = UDim2.new(0.08, 0, 0.32, 0)
+XRayBtn.Size = UDim2.new(0.84, 0, 0, 30)
 XRayBtn.Text = "X-Ray: OFF"
 XRayBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
 XRayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -98,11 +125,11 @@ XRayBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- C) Dash (Impulso Rápido)
+-- D) Dash
 local DashBtn = Instance.new("TextButton")
 DashBtn.Parent = Frame
-DashBtn.Position = UDim2.new(0.08, 0, 0.40, 0)
-DashBtn.Size = UDim2.new(0.84, 0, 0, 32)
+DashBtn.Position = UDim2.new(0.08, 0, 0.42, 0)
+DashBtn.Size = UDim2.new(0.84, 0, 0, 30)
 DashBtn.Text = "⚡ Usar Dash"
 DashBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 DashBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -114,29 +141,29 @@ DashBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- D) Teleport con Distancia
+-- E) Teleport con Distancia
 local tpDistance = 30
 
 local DistLabel = Instance.new("TextLabel")
 DistLabel.Parent = Frame
 DistLabel.Position = UDim2.new(0.08, 0, 0.53, 0)
-DistLabel.Size = UDim2.new(0.84, 0, 0, 25)
+DistLabel.Size = UDim2.new(0.84, 0, 0, 20)
 DistLabel.Text = "Distancia TP: " .. tpDistance
 DistLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 DistLabel.BackgroundTransparency = 1
 
 local MinusBtn = Instance.new("TextButton")
 MinusBtn.Parent = Frame
-MinusBtn.Position = UDim2.new(0.08, 0, 0.63, 0)
-MinusBtn.Size = UDim2.new(0.38, 0, 0, 30)
+MinusBtn.Position = UDim2.new(0.08, 0, 0.61, 0)
+MinusBtn.Size = UDim2.new(0.38, 0, 0, 28)
 MinusBtn.Text = "- 10"
 MinusBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 MinusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local PlusBtn = Instance.new("TextButton")
 PlusBtn.Parent = Frame
-PlusBtn.Position = UDim2.new(0.54, 0, 0.63, 0)
-PlusBtn.Size = UDim2.new(0.38, 0, 0, 30)
+PlusBtn.Position = UDim2.new(0.54, 0, 0.61, 0)
+PlusBtn.Size = UDim2.new(0.38, 0, 0, 28)
 PlusBtn.Text = "+ 10"
 PlusBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 PlusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -155,8 +182,8 @@ end)
 
 local TPBtn = Instance.new("TextButton")
 TPBtn.Parent = Frame
-TPBtn.Position = UDim2.new(0.08, 0, 0.76, 0)
-TPBtn.Size = UDim2.new(0.84, 0, 0, 35)
+TPBtn.Position = UDim2.new(0.08, 0, 0.71, 0)
+TPBtn.Size = UDim2.new(0.84, 0, 0, 32)
 TPBtn.Text = "🚀 Teleport Adelante"
 TPBtn.BackgroundColor3 = Color3.fromRGB(120, 40, 180)
 TPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -168,9 +195,9 @@ TPBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- E) Anti-AFK Automático
+-- F) Anti-AFK Automático
 LocalPlayer.Idled:Connect(function()
     VirtualUser:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
-    wait(1)
+    task.wait(1)
     VirtualUser:Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
 end)
