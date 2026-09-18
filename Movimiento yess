@@ -1,0 +1,220 @@
+-- LocalScript en StarterPlayerScripts
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Variables de estado
+local estadoMovimiento = false
+local renderConnection = nil
+
+-- Crear la interfaz gráfica (UI)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MovimientoYessGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Panel Principal
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 320, 0, 180)
+mainFrame.Position = UDim2.new(0.5, -160, 0.4, -90)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
+
+-- Título
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "Title"
+titleLabel.Size = UDim2.new(1, -60, 0, 35)
+titleLabel.Position = UDim2.new(0, 10, 0, 5)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "movimiento yess"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 18
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = mainFrame
+
+-- Botón de Minimizar (-)
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Name = "MinimizeButton"
+minimizeButton.Size = UDim2.new(0, 28, 0, 28)
+minimizeButton.Position = UDim2.new(1, -34, 0, 8)
+minimizeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+minimizeButton.Text = "-"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.TextSize = 20
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.Parent = mainFrame
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minimizeButton
+
+-- Descripción
+local descLabel = Instance.new("TextLabel")
+descLabel.Name = "Description"
+descLabel.Size = UDim2.new(1, -20, 0, 40)
+descLabel.Position = UDim2.new(0, 10, 0, 42)
+descLabel.BackgroundTransparency = 1
+descLabel.Text = "Movimiento y giro instantáneo\nFrenado en seco sin perder velocidad"
+descLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+descLabel.TextSize = 13
+descLabel.Font = Enum.Font.Gotham
+descLabel.TextWrapped = true
+descLabel.Parent = mainFrame
+
+-- Botón ON / OFF Grande
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Size = UDim2.new(1, -30, 0, 45)
+toggleButton.Position = UDim2.new(0, 15, 1, -55)
+toggleButton.BackgroundColor3 = Color3.fromRGB(190, 40, 40)
+toggleButton.Text = "OFF"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 18
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = mainFrame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 8)
+btnCorner.Parent = toggleButton
+
+----------------------------------------------------
+-- MINIPANEL COMPACTO (+)
+----------------------------------------------------
+local miniFrame = Instance.new("Frame")
+miniFrame.Name = "MiniFrame"
+miniFrame.Size = UDim2.new(0, 120, 0, 36)
+miniFrame.Position = UDim2.new(0.5, -60, 0.1, 0)
+miniFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+miniFrame.BorderSizePixel = 0
+miniFrame.Active = true
+miniFrame.Draggable = true
+miniFrame.Visible = false
+miniFrame.Parent = screenGui
+
+local miniCorner = Instance.new("UICorner")
+miniCorner.CornerRadius = UDim.new(0, 8)
+miniCorner.Parent = miniFrame
+
+-- Botón Maximizar (+)
+local maximizeButton = Instance.new("TextButton")
+maximizeButton.Name = "MaximizeButton"
+maximizeButton.Size = UDim2.new(0, 24, 0, 24)
+maximizeButton.Position = UDim2.new(0, 6, 0.5, -12)
+maximizeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+maximizeButton.Text = "+"
+maximizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+maximizeButton.TextSize = 16
+maximizeButton.Font = Enum.Font.GothamBold
+maximizeButton.Parent = miniFrame
+
+local maxCorner = Instance.new("UICorner")
+maxCorner.CornerRadius = UDim.new(0, 6)
+maxCorner.Parent = maximizeButton
+
+-- Botón Rápido ON / OFF en el Minipanel
+local miniToggleButton = Instance.new("TextButton")
+miniToggleButton.Name = "MiniToggleButton"
+miniToggleButton.Size = UDim2.new(0, 78, 0, 24)
+miniToggleButton.Position = UDim2.new(1, -84, 0.5, -12)
+miniToggleButton.BackgroundColor3 = Color3.fromRGB(190, 40, 40)
+miniToggleButton.Text = "yess: OFF"
+miniToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+miniToggleButton.TextSize = 11
+miniToggleButton.Font = Enum.Font.GothamBold
+miniToggleButton.Parent = miniFrame
+
+local miniBtnCorner = Instance.new("UICorner")
+miniBtnCorner.CornerRadius = UDim.new(0, 6)
+miniBtnCorner.Parent = miniToggleButton
+
+----------------------------------------------------
+-- LÓGICA DE MOVIMIENTO
+----------------------------------------------------
+local function activarMovimiento()
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hum = char:WaitForChild("Humanoid")
+	local root = char:WaitForChild("HumanoidRootPart")
+	
+	hum.WalkSpeed = 24
+	hum.AutoRotate = false
+	
+	renderConnection = RunService.RenderStepped:Connect(function()
+		if hum and root and hum.Health > 0 then
+			local moveDir = hum.MoveDirection
+			if moveDir.Magnitude > 0 then
+				root.CFrame = CFrame.lookAt(root.Position, root.Position + Vector3.new(moveDir.X, 0, moveDir.Z))
+				root.AssemblyLinearVelocity = Vector3.new(moveDir.X * hum.WalkSpeed, root.AssemblyLinearVelocity.Y, moveDir.Z * hum.WalkSpeed)
+			else
+				root.AssemblyLinearVelocity = Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
+			end
+		end
+	end)
+end
+
+local function desactivarMovimiento()
+	if renderConnection then
+		renderConnection:Disconnect()
+		renderConnection = nil
+	end
+	local char = player.Character
+	if char then
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.WalkSpeed = 16
+			hum.AutoRotate = true
+		end
+	end
+end
+
+local function actualizarEstadoUI(nuevoEstado)
+	estadoMovimiento = nuevoEstado
+	if estadoMovimiento then
+		toggleButton.Text = "ON"
+		toggleButton.BackgroundColor3 = Color3.fromRGB(40, 190, 70)
+		
+		miniToggleButton.Text = "yess: ON"
+		miniToggleButton.BackgroundColor3 = Color3.fromRGB(40, 190, 70)
+		
+		activarMovimiento()
+	else
+		toggleButton.Text = "OFF"
+		toggleButton.BackgroundColor3 = Color3.fromRGB(190, 40, 40)
+		
+		miniToggleButton.Text = "yess: OFF"
+		miniToggleButton.BackgroundColor3 = Color3.fromRGB(190, 40, 40)
+		
+		desactivarMovimiento()
+	end
+end
+
+-- Eventos
+toggleButton.MouseButton1Click:Connect(function()
+	actualizarEstadoUI(not estadoMovimiento)
+end)
+
+miniToggleButton.MouseButton1Click:Connect(function()
+	actualizarEstadoUI(not estadoMovimiento)
+end)
+
+-- Minimizar
+minimizeButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = false
+	miniFrame.Visible = true
+end)
+
+-- Maximizar
+maximizeButton.MouseButton1Click:Connect(function()
+	miniFrame.Visible = false
+	mainFrame.Visible = true
+end)
