@@ -1,38 +1,33 @@
--- Script Jesús Completo para Roblox (Delta)
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
+-- Script Jesús con Mini Panel Flotante
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Script Jesús", "DarkTheme")
 
--- 1. Notificación de Inicio
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Script Jesús";
-    Text = "¡Menú Completo Activado!";
-    Duration = 5;
-})
+-- Tab Principal
+local MainTab = Window:NewTab("Funciones")
+local MainSection = MainTab:NewSection("Controles")
 
--- 2. Anti-AFK (Evita que el juego te saque por inactividad)
-local VirtualUser = game:GetService("VirtualUser")
-LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
-    wait(1)
-    VirtualUser:Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+-- Variables de Estado
+local NoclipActive = false
+local XRayActive = false
+
+-- 1. Velocidad
+MainSection:NewSlider("Velocidad", "Ajusta tu velocidad", 100, 16, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
 end)
 
--- 3. Velocidad y Salto Aumentados
-local function applyStats()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 50
-        LocalPlayer.Character.Humanoid.JumpPower = 120
-    end
-end
-applyStats()
-LocalPlayer.CharacterAdded:Connect(applyStats)
+-- 2. Salto
+MainSection:NewSlider("Salto", "Ajusta la fuerza de salto", 200, 50, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+end)
 
--- 4. Noclip (Atravesar paredes)
-RunService.Stepped:Connect(function()
-    if LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+-- 3. Noclip (On / Off)
+MainSection:NewToggle("Noclip (Paredes)", "Atraviesa paredes", function(state)
+    NoclipActive = state
+end)
+
+game:GetService("RunService").Stepped:Connect(function()
+    if NoclipActive and game.Players.LocalPlayer.Character then
+        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
             end
@@ -40,22 +35,27 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- 5. X-Ray (Ver a través de paredes/bloques)
-for _, object in pairs(Workspace:GetDescendants()) do
-    if object:IsA("BasePart") and not object:IsDescendantOf(LocalPlayer.Character) then
-        object.LocalTransparencyModifier = 0.5
-    end
-end
-
--- 6. Función de Teleport (TP a otro jugador)
-_G.TP = function(playerName)
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Name:lower():sub(1, #playerName) == playerName:lower() then
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-            end
+-- 4. X-Ray (On / Off)
+MainSection:NewToggle("X-Ray (Transparencia)", "Ver a través de paredes", function(state)
+    XRayActive = state
+    for _, object in pairs(workspace:GetDescendants()) do
+        if object:IsA("BasePart") and not object:IsDescendantOf(game.Players.LocalPlayer.Character) then
+            object.LocalTransparencyModifier = XRayActive and 0.5 or 0
         end
     end
-end
+end)
 
-print("Script Jesús cargado con éxito: Velocidad, Noclip, X-Ray, Anti-AFK y TP listos.")
+-- 5. Anti-AFK (Siempre activo)
+local VirtualUser = game:GetService("VirtualUser")
+game.Players.LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+-- Notificación
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Script Jesús";
+    Text = "¡Mini Panel Cargado!";
+    Duration = 5;
+})
